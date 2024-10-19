@@ -7,6 +7,7 @@ const app = express();
 
 const httpPort = process.env.HTTP_PORT || 80;
 const httpsPort = process.env.HTTPS_PORT || 443;
+const host = process.env.HOST || 'localhost';
 
 // AASA JSON 数据
 const aasaData = {
@@ -73,13 +74,13 @@ const httpsOptions = {
 };
 
 // 创建HTTP服务器
-http.createServer(app).listen(httpPort, () => {
-    console.log(`HTTP server is running on http://localhost:${httpPort}`);
+http.createServer(app).listen(httpPort, host, () => {
+    console.log(`HTTP server is running on http://${host}:${httpPort}`);
 });
 
 // 创建HTTPS服务器
-https.createServer(httpsOptions, app).listen(httpsPort, () => {
-    console.log(`HTTPS server is running on https://localhost:${httpsPort}`);
+https.createServer(httpsOptions, app).listen(httpsPort, host, () => {
+    console.log(`HTTPS server is running on https://${host}:${httpsPort}`);
 });
 
 // 可选：HTTP到HTTPS的重定向
