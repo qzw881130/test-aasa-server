@@ -1,8 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const https = require('https');
 const fs = require('fs');
 const app = express();
-const port = 3008; // 更改端口号为 3008
+const port = process.env.PORT || 3008;
 
 // AASA JSON 数据
 const aasaData = {
@@ -64,8 +65,8 @@ app.get('/', (req, res) => {
 
 // 读取SSL证书
 const options = {
-    key: fs.readFileSync('ssl/server.key'),
-    cert: fs.readFileSync('ssl/server.cert')
+    key: fs.readFileSync(process.env.SSL_KEY_PATH),
+    cert: fs.readFileSync(process.env.SSL_CERT_PATH)
 };
 
 // 创建HTTPS服务器
