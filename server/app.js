@@ -1,4 +1,6 @@
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const app = express();
 const port = 3008; // 更改端口号为 3008
 
@@ -60,7 +62,13 @@ app.get('/', (req, res) => {
     `);
 });
 
-// 启动服务器
-app.listen(port, () => {
-    console.log(`AASA server is running on port ${port}`);
+// 读取SSL证书
+const options = {
+    key: fs.readFileSync('ssl/server.key'),
+    cert: fs.readFileSync('ssl/server.cert')
+};
+
+// 创建HTTPS服务器
+https.createServer(options, app).listen(port, () => {
+    console.log(`AASA server is running on https://localhost:${port}`);
 });
