@@ -1,9 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const app = express();
-const port = process.env.PORT || 3008;
+
+const httpPort = process.env.HTTP_PORT || 80;
+const httpsPort = process.env.HTTPS_PORT || 443;
 
 // AASA JSON 数据
 const aasaData = {
@@ -64,12 +67,25 @@ app.get('/', (req, res) => {
 });
 
 // 读取SSL证书
-const options = {
+const httpsOptions = {
     key: fs.readFileSync(process.env.SSL_KEY_PATH),
     cert: fs.readFileSync(process.env.SSL_CERT_PATH)
 };
 
+// 创建HTTP服务器
+http.createServer(app).listen(httpPort, () => {
+    console.log(`HTTP server is running on http://localhost:${httpPort}`);
+});
+
 // 创建HTTPS服务器
-https.createServer(options, app).listen(port, () => {
-    console.log(`AASA server is running on https://localhost:${port}`);
+https.createServer(httpsOptions, app).listen(httpsPort, () => {
+    console.log(`HTTPS server is running on https://localhost:${httpsPort}`);
+});
+
+// 可选：HTTP到HTTPS的重定向
+app.use((req, res, next) => {
+    if (!req.secure) {
+        return res.redirect(['https://', req.get('Host'), req.url].join(''));
+    }
+    next();
 });
