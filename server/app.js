@@ -148,3 +148,22 @@ app.get('/user-agent', (req, res) => {
     const userAgent = req.get('User-Agent');
     res.send(`<h1>Your User Agent is:</h1><p>${userAgent}</p>`);
 });
+
+// 新增的 /test-redirect-regn-app 路由
+app.get('/test-redirect-regn-app', (req, res) => {
+    res.send(`
+        <html>
+            <body>
+                <h1>Test Redirect to REGN App</h1>
+                <p>Click the button below to redirect to REGN app:</p>
+                <button onclick="window.location.href = 'regn:///product/nP56hOQP7gLx3uEMbyF0'">
+                    Redirect to REGN App
+                </button>
+                <script>
+                    // 自动跳转
+                    window.location.href = 'regn:///product/nP56hOQP7gLx3uEMbyF0';
+                </script>
+            </body>
+        </html>
+    `);
+});
