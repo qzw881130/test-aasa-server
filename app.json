@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.qianzhiwei5921.test-aasa"
     },
     "android": {
       "adaptiveIcon": {

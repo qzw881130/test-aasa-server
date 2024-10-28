@@ -3,11 +3,31 @@ const express = require('express');
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
 const app = express();
 
-const httpPort = process.env.HTTP_PORT || 80;
+let httpPort = process.env.HTTP_PORT || 80;
 const httpsPort = process.env.HTTPS_PORT || 443;
 const host = process.env.HOST || 'localhost';
+
+// 确保 files 目录存在
+const uploadDir = path.join(__dirname, 'files');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+// 配置 multer
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir)
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname)
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // AASA JSON 数据
 const aasaData = {
@@ -67,6 +87,19 @@ app.get('/', (req, res) => {
     `);
 });
 
+// 文件上传路由
+app.post('/upload', upload.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).send('No file uploaded.');
+    }
+    const protocol = req.secure ? 'https' : 'http';
+    const fullUrl = `${protocol}://${req.get('host')}/files/${req.file.filename}`;
+    res.json({ message: 'File uploaded successfully', downloadLink: fullUrl });
+});
+
+// 文件下载路由
+app.use('/files', express.static(uploadDir));
+
 // 读取SSL证书
 const httpsOptions = {
     key: fs.readFileSync(process.env.SSL_KEY_PATH),
@@ -74,13 +107,32 @@ const httpsOptions = {
 };
 
 // 创建HTTP服务器
-http.createServer(app).listen(httpPort, host, () => {
-    console.log(`HTTP server is running on http://${host}:${httpPort}`);
-});
+function startHttpServer() {
+    const httpServer = http.createServer(app);
+    httpServer.listen(httpPort, host, () => {
+        console.log(`HTTP server is running on http://${host}:${httpPort}`);
+    }).on('error', (e) => {
+        if (e.code === 'EACCES' && httpPort < 1024) {
+            console.log(`Port ${httpPort} requires elevated privileges. Trying port 8080.`);
+            httpPort = 8080;
+            startHttpServer();
+        } else {
+            console.error(e);
+        }
+    });
+}
+
+startHttpServer();
 
 // 创建HTTPS服务器
 https.createServer(httpsOptions, app).listen(httpsPort, host, () => {
     console.log(`HTTPS server is running on https://${host}:${httpsPort}`);
+}).on('error', (e) => {
+    if (e.code === 'EACCES') {
+        console.error(`Port ${httpsPort} requires elevated privileges. Please run with sudo or choose a port > 1024.`);
+    } else {
+        console.error(e);
+    }
 });
 
 // 可选：HTTP到HTTPS的重定向
@@ -89,4 +141,10 @@ app.use((req, res, next) => {
         return res.redirect(['https://', req.get('Host'), req.url].join(''));
     }
     next();
+});
+
+// 新增的 /user-agent 路由
+app.get('/user-agent', (req, res) => {
+    const userAgent = req.get('User-Agent');
+    res.send(`<h1>Your User Agent is:</h1><p>${userAgent}</p>`);
 });
