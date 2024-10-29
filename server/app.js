@@ -230,11 +230,11 @@ app.get('/test-auto-redirect', (req, res) => {
                                 }
                                 
                                 if (/android/i.test(userAgent)) {
-                                    window.location.href = 'https://play.google.com/store/apps/details?id=com.qianzhiwei5921.test-aasa';
+                                    window.location.href = 'https://play.google.com/store/apps/details?id=store.regn';
                                 } else if (/iPad|iPhone|iPod/i.test(userAgent)) {
-                                    window.location.href = 'https://apps.apple.com/app/test-aasa/id您的APP_ID';
+                                    window.location.href = 'https://apps.apple.com/az/app/regn/id1658308816';
                                 } else {
-                                    window.location.href = 'https://apps.apple.com/app/test-aasa/id您的APP_ID';
+                                    window.location.href = 'https://apps.apple.com/az/app/regn/id1658308816';
                                 }
                             }
                         }, timeout);
