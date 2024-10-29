@@ -192,3 +192,50 @@ app.get('/test-custom-scheme', (req, res) => {
         </html>
     `);
 });
+
+// 新增的 /test-auto-redirect 路由
+app.get('/test-auto-redirect', (req, res) => {
+    res.send(`
+        <html>
+            <head>
+                <title>Auto Redirect Test</title>
+            </head>
+            <body>
+                <h1>Testing Auto Redirect...</h1>
+                <p>Redirecting to app or store...</p>
+                <script>
+                    let hasRedirected = false;
+
+                    function openApp() {
+                        try {
+                            window.location.href = 'test-aasa:///product/aaa';
+                            hasRedirected = true;
+                        } catch (e) {
+                            console.error('Error opening app:', e.message);
+                        }
+
+                        // 延迟检查是否需要跳转到应用商店
+                        setTimeout(function () {
+                            if (hasRedirected) return;
+
+                            const userAgent = navigator.userAgent || navigator.vendor;
+                            if (/android/i.test(userAgent)) {
+                                // 替换为您的 Android 应用商店链接
+                                window.location.href = 'https://play.google.com/store/apps/details?id=com.qianzhiwei5921.test-aasa';
+                            } else if (/iPad|iPhone|iPod/i.test(userAgent)) {
+                                // 替换为您的 iOS 应用商店链接
+                                window.location.href = 'https://apps.apple.com/app/test-aasa/id您的APP_ID';
+                            } else {
+                                // 默认跳转到 iOS App Store
+                                window.location.href = 'https://apps.apple.com/app/test-aasa/id您的APP_ID';
+                            }
+                        }, 2000);
+                    }
+
+                    // 页面加载完成后自动执行
+                    window.onload = openApp;
+                </script>
+            </body>
+        </html>
+    `);
+});

@@ -1,7 +1,11 @@
 # workflow
 
 ```
-applinks:dffd-123-182-5-27.ngrok-free.app
-activitycontinuation:dffd-123-182-5-27.ngrok-free.app
-webcredentials:dffd-123-182-5-27.ngrok-free.app
+applinks:aasa.qzw123.com
+activitycontinuation:aasa.qzw123.com
+webcredentials:aasa.qzw123.com
+```
+
+```
+https://aasa.qzw123.com/test-custom-scheme
 ```
