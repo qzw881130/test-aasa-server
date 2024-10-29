@@ -1,4 +1,6 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform, Linking } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useEffect } from 'react';
 
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -6,6 +8,37 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // 处理传入的 URL
+    const handleUrl = ({ url }: { url: string }) => {
+      console.log('Received URL:', url);
+      // 解析 URL
+      if (url.startsWith('test-aasa://')) {
+        const path = url.replace('test-aasa://', '');
+        // 根据路径进行导航
+        if (path.includes('/product/')) {
+          router.push(path);
+        }
+      }
+    };
+
+    // 添加 URL 监听器
+    const subscription = Linking.addEventListener('url', handleUrl);
+
+    // 检查是否通过 URL 启动
+    Linking.getInitialURL().then(url => {
+      if (url) {
+        handleUrl({ url });
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}

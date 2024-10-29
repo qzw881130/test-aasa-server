@@ -167,3 +167,28 @@ app.get('/test-redirect-regn-app', (req, res) => {
         </html>
     `);
 });
+
+// 新增测试自定义协议跳转的路由
+app.get('/test-custom-scheme', (req, res) => {
+    res.send(`
+        <html>
+            <body>
+                <h1>Test Custom URL Scheme</h1>
+                <p>Click the links below to test app opening:</p>
+                <ul>
+                    <li><a href="test-aasa:///product/aaa">Open App with test-aasa:///product/aaa</a></li>
+                    <li><button onclick="window.location.href='test-aasa:///product/aaa'">
+                        Open App (Button)
+                    </button></li>
+                </ul>
+                <script>
+                    // 检测是否支持自定义协议
+                    function openApp() {
+                        // 尝试打开应用
+                        window.location.href = 'test-aasa:///product/aaa';
+                    }
+                </script>
+            </body>
+        </html>
+    `);
+});

@@ -5,7 +5,6 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:aasa.qzw123.com</string>
-		<string>activitycontinuation:aasa.qzw123.com</string>
 		<string>webcredentials:aasa.qzw123.com</string>
 	</array>
 </dict>

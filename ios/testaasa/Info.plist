@@ -27,7 +27,7 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>myapp</string>
+          <string>test-aasa</string>
           <string>com.qianzhiwei5921.test-aasa</string>
         </array>
       </dict>
