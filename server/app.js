@@ -218,12 +218,16 @@ app.get('/test-auto-redirect', (req, res) => {
                         color: #666;
                         margin-right: 10px;
                     }
+                    #appFrame {
+                        display: none;
+                    }
                 </style>
             </head>
             <body>
                 <h1>Testing Auto Redirect...</h1>
                 <p>Redirecting to app or store...</p>
                 <div id="logArea"></div>
+                <iframe id="appFrame"></iframe>
                 <script>
                     function log(message) {
                         const logArea = document.getElementById('logArea');
@@ -235,16 +239,24 @@ app.get('/test-auto-redirect', (req, res) => {
                     }
 
                     function tryOpenApp() {
-                        const timeout = 1500;
+                        const timeout = 2500;
                         log('开始尝试打开应用...');
                         
                         const start = Date.now();
                         log('记录开始时间: ' + start);
                         
+                        const iframe = document.getElementById('appFrame');
+                        
+                        document.addEventListener('visibilitychange', function() {
+                            log('页面可见性状态改变: ' + document.visibilityState);
+                        });
+
                         try {
-                            log('尝试打开新窗口...');
-                            const appWindow = window.open('test-aasa:///product/aaa');
-                            log('新窗口创建' + (appWindow ? '成功' : '失败'));
+                            log('尝试通过 iframe 打开应用...');
+                            iframe.src = 'test-aasa:///product/aaa';
+                            
+                            log('尝试直接跳转...');
+                            window.location.href = 'test-aasa:///product/aaa';
                             
                             setTimeout(function() {
                                 const userAgent = navigator.userAgent || navigator.vendor;
@@ -253,21 +265,13 @@ app.get('/test-auto-redirect', (req, res) => {
                                 const timeElapsed = Date.now() - start;
                                 log('经过时间: ' + timeElapsed + 'ms');
                                 
-                                const isHidden = document.hidden || document.webkitHidden;
+                                const isHidden = document.visibilityState === 'hidden';
                                 log('页面是否隐藏: ' + isHidden);
                                 
-                                if (isHidden || timeElapsed > timeout) {
-                                    log('检测到应用可能已打开');
-                                    if (appWindow) {
-                                        appWindow.close();
-                                        log('关闭新窗口');
-                                    }
+                                if (isHidden) {
+                                    log('检测到应用已打开');
                                 } else {
                                     log('应用可能未安装，准备跳转到应用商店');
-                                    if (appWindow) {
-                                        appWindow.close();
-                                        log('关闭新窗口');
-                                    }
                                     
                                     let storeUrl;
                                     if (/android/i.test(userAgent)) {
