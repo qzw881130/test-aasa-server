@@ -19,7 +19,8 @@ export default function HomeScreen() {
         const path = url.replace('test-aasa://', '');
         // 根据路径进行导航
         if (path.includes('/product/')) {
-          router.push(path);
+          const id = path.split('/').pop(); // 获取最后一个部分作为ID
+          router.push(`/product/${id}`);
         }
       }
     };
@@ -37,7 +38,7 @@ export default function HomeScreen() {
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [router]);
 
   return (
     <ParallaxScrollView
