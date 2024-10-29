@@ -199,49 +199,104 @@ app.get('/test-auto-redirect', (req, res) => {
         <html>
             <head>
                 <title>Auto Redirect Test</title>
+                <style>
+                    #logArea {
+                        border: 1px solid #ccc;
+                        padding: 10px;
+                        margin: 10px 0;
+                        height: 200px;
+                        overflow-y: auto;
+                        background: #f5f5f5;
+                        font-family: monospace;
+                    }
+                    .log-entry {
+                        margin: 5px 0;
+                        padding: 3px;
+                        border-bottom: 1px solid #eee;
+                    }
+                    .timestamp {
+                        color: #666;
+                        margin-right: 10px;
+                    }
+                </style>
             </head>
             <body>
                 <h1>Testing Auto Redirect...</h1>
                 <p>Redirecting to app or store...</p>
+                <div id="logArea"></div>
                 <script>
-                    // 使用 Promise 和 setTimeout 来检测应用是否打开
-                    function tryOpenApp() {
-                        const timeout = 1500;
-                        
-                        // 记录当前时间
-                        const start = Date.now();
-                        
-                        // 在新窗口中尝试打开应用
-                        const appWindow = window.open('test-aasa:///product/aaa');
-                        
-                        // 延迟检查
-                        setTimeout(function() {
-                            const userAgent = navigator.userAgent || navigator.vendor;
-                            // 如果页面隐藏了或者超过1.5秒，认为应用已经打开
-                            if (document.hidden || document.webkitHidden || (Date.now() - start) > timeout) {
-                                // 应用可能已经打开，关闭新窗口
-                                if (appWindow) {
-                                    appWindow.close();
-                                }
-                            } else {
-                                // 应用可能未安装，跳转到应用商店
-                                if (appWindow) {
-                                    appWindow.close();
-                                }
-                                
-                                if (/android/i.test(userAgent)) {
-                                    window.location.href = 'https://play.google.com/store/apps/details?id=store.regn';
-                                } else if (/iPad|iPhone|iPod/i.test(userAgent)) {
-                                    window.location.href = 'https://apps.apple.com/az/app/regn/id1658308816';
-                                } else {
-                                    window.location.href = 'https://apps.apple.com/az/app/regn/id1658308816';
-                                }
-                            }
-                        }, timeout);
+                    function log(message) {
+                        const logArea = document.getElementById('logArea');
+                        const timestamp = new Date().toLocaleTimeString();
+                        const entry = document.createElement('div');
+                        entry.className = 'log-entry';
+                        entry.innerHTML = \`<span class="timestamp">\${timestamp}</span>\${message}\`;
+                        logArea.insertBefore(entry, logArea.firstChild);
                     }
 
-                    // 页面加载完成后自动执行
-                    window.onload = tryOpenApp;
+                    function tryOpenApp() {
+                        const timeout = 1500;
+                        log('开始尝试打开应用...');
+                        
+                        const start = Date.now();
+                        log('记录开始时间: ' + start);
+                        
+                        try {
+                            log('尝试打开新窗口...');
+                            const appWindow = window.open('test-aasa:///product/aaa');
+                            log('新窗口创建' + (appWindow ? '成功' : '失败'));
+                            
+                            setTimeout(function() {
+                                const userAgent = navigator.userAgent || navigator.vendor;
+                                log('当前 User Agent: ' + userAgent);
+                                
+                                const timeElapsed = Date.now() - start;
+                                log('经过时间: ' + timeElapsed + 'ms');
+                                
+                                const isHidden = document.hidden || document.webkitHidden;
+                                log('页面是否隐藏: ' + isHidden);
+                                
+                                if (isHidden || timeElapsed > timeout) {
+                                    log('检测到应用可能已打开');
+                                    if (appWindow) {
+                                        appWindow.close();
+                                        log('关闭新窗口');
+                                    }
+                                } else {
+                                    log('应用可能未安装，准备跳转到应用商店');
+                                    if (appWindow) {
+                                        appWindow.close();
+                                        log('关闭新窗口');
+                                    }
+                                    
+                                    let storeUrl;
+                                    if (/android/i.test(userAgent)) {
+                                        storeUrl = 'https://play.google.com/store/apps/details?id=store.regn';
+                                        log('检测到 Android 设备，跳转到 Play Store');
+                                    } else if (/iPad|iPhone|iPod/i.test(userAgent)) {
+                                        storeUrl = 'https://apps.apple.com/az/app/regn/id1658308816';
+                                        log('检测到 iOS 设备，跳转到 App Store');
+                                    } else {
+                                        storeUrl = 'https://apps.apple.com/az/app/regn/id1658308816';
+                                        log('未知设备，默认跳转到 App Store');
+                                    }
+                                    
+                                    log('即将跳转到: ' + storeUrl);
+                                    window.location.href = storeUrl;
+                                }
+                            }, timeout);
+                            
+                            log('设置 ' + timeout + 'ms 后检查状态');
+                        } catch (error) {
+                            log('发生错误: ' + error.message);
+                        }
+                    }
+
+                    log('页面加载完成');
+                    window.onload = function() {
+                        log('window.onload 触发');
+                        tryOpenApp();
+                    };
                 </script>
             </body>
         </html>
