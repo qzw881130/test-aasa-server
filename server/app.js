@@ -204,36 +204,44 @@ app.get('/test-auto-redirect', (req, res) => {
                 <h1>Testing Auto Redirect...</h1>
                 <p>Redirecting to app or store...</p>
                 <script>
-                    let hasRedirected = false;
-
-                    function openApp() {
-                        try {
-                            window.location.href = 'test-aasa:///product/aaa';
-                            hasRedirected = true;
-                        } catch (e) {
-                            console.error('Error opening app:', e.message);
-                        }
-
-                        // 延迟检查是否需要跳转到应用商店
-                        setTimeout(function () {
-                            if (hasRedirected) return;
-
+                    // 使用 Promise 和 setTimeout 来检测应用是否打开
+                    function tryOpenApp() {
+                        const timeout = 1500;
+                        
+                        // 记录当前时间
+                        const start = Date.now();
+                        
+                        // 在新窗口中尝试打开应用
+                        const appWindow = window.open('test-aasa:///product/aaa');
+                        
+                        // 延迟检查
+                        setTimeout(function() {
                             const userAgent = navigator.userAgent || navigator.vendor;
-                            if (/android/i.test(userAgent)) {
-                                // 替换为您的 Android 应用商店链接
-                                window.location.href = 'https://play.google.com/store/apps/details?id=com.qianzhiwei5921.test-aasa';
-                            } else if (/iPad|iPhone|iPod/i.test(userAgent)) {
-                                // 替换为您的 iOS 应用商店链接
-                                window.location.href = 'https://apps.apple.com/app/test-aasa/id您的APP_ID';
+                            // 如果页面隐藏了或者超过1.5秒，认为应用已经打开
+                            if (document.hidden || document.webkitHidden || (Date.now() - start) > timeout) {
+                                // 应用可能已经打开，关闭新窗口
+                                if (appWindow) {
+                                    appWindow.close();
+                                }
                             } else {
-                                // 默认跳转到 iOS App Store
-                                window.location.href = 'https://apps.apple.com/app/test-aasa/id您的APP_ID';
+                                // 应用可能未安装，跳转到应用商店
+                                if (appWindow) {
+                                    appWindow.close();
+                                }
+                                
+                                if (/android/i.test(userAgent)) {
+                                    window.location.href = 'https://play.google.com/store/apps/details?id=com.qianzhiwei5921.test-aasa';
+                                } else if (/iPad|iPhone|iPod/i.test(userAgent)) {
+                                    window.location.href = 'https://apps.apple.com/app/test-aasa/id您的APP_ID';
+                                } else {
+                                    window.location.href = 'https://apps.apple.com/app/test-aasa/id您的APP_ID';
+                                }
                             }
-                        }, 2000);
+                        }, timeout);
                     }
 
                     // 页面加载完成后自动执行
-                    window.onload = openApp;
+                    window.onload = tryOpenApp;
                 </script>
             </body>
         </html>
